@@ -36,14 +36,14 @@ def _create_onnx_session_options():
 
 def _get_rembg_session():
     """Lazily create and return a singleton rembg/ONNX session."""
-    from rembg.sessions.u2net import U2netSession
+    from rembg.sessions.u2net_human_seg import U2netHumanSegSession
 
     global _rembg_session
     if _rembg_session is None:
-        logger.info("Initialising rembg/ONNX session (u2net, CPUExecutionProvider)…")
+        logger.info("Initialising rembg/ONNX session (u2net_human_seg, CPUExecutionProvider)…")
         sess_opts = _create_onnx_session_options()
-        _rembg_session = U2netSession(
-            model_name="u2net",
+        _rembg_session = U2netHumanSegSession(
+            model_name="u2net_human_seg",
             sess_opts=sess_opts,
             providers=["CPUExecutionProvider"],
         )
@@ -52,7 +52,7 @@ def _get_rembg_session():
 
 
 def _remove_background_onnx(image: Image.Image) -> Image.Image:
-    """Background removal via rembg (ONNX u2net model)."""
+    """Background removal via rembg (ONNX u2net_human_seg model)."""
     from rembg import remove as rembg_remove
 
     img_byte_arr = io.BytesIO()
@@ -138,7 +138,7 @@ def _resolve_backend() -> str:
         import onnxruntime  # noqa: F401
         import rembg        # noqa: F401
         _BACKEND = "onnx"
-        logger.info("Background removal backend: rembg/ONNX (u2net)")
+        logger.info("Background removal backend: rembg/ONNX (u2net_human_seg)")
     except ImportError:
         _BACKEND = "grabcut"
         logger.info("rembg/onnxruntime not available — using OpenCV GrabCut fallback")
