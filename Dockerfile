@@ -33,6 +33,6 @@ ENV OPENBLAS_NUM_THREADS=1
 ENV ORT_LOG_LEVEL=ERROR
 ENV PYTHONPATH=/app/backend
 
-EXPOSE 8000
+EXPOSE 10000
 
 CMD ["gunicorn", "backend.app.main:app", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "-b", "0.0.0.0:10000"]
