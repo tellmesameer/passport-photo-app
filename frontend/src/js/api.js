@@ -1,5 +1,5 @@
-const API_URL = 'http://127.0.0.1:8000/api/v1/photo/process'; // Using absolute URL for direct local testing. In Docker with Nginx, change to '/api/v1/photo/process'
-const PDF_API_URL = 'http://127.0.0.1:8000/api/v1/photo/generate-pdf';
+const API_URL = '/api/v1/photo/process';
+const PDF_API_URL = '/api/v1/photo/generate-pdf';
 
 async function generatePassportLayout(file, copies, removeBg, enhance, pageSize, orientation) {
     const formData = new FormData();

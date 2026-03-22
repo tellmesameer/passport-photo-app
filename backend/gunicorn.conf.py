@@ -7,7 +7,7 @@
 import os
 
 # ── Worker settings ──────────────────────────────────────────────────
-bind = f":{os.environ.get('PORT', '8080')}"
+bind = f":{os.environ.get('PORT', '3000')}"
 workers = int(os.environ.get("WEB_CONCURRENCY", "1"))
 worker_class = "uvicorn.workers.UvicornWorker"
 timeout = 600

@@ -2,8 +2,6 @@ import io
 import logging
 from PIL import Image, ImageEnhance
 from rembg import remove
-from rembg.sessions.u2net import U2netSession
-import onnxruntime as ort
 
 logger = logging.getLogger(__name__)
 
@@ -29,8 +27,13 @@ logger = logging.getLogger(__name__)
 _rembg_session = None
 
 
-def _create_session_options() -> ort.SessionOptions:
+def _create_session_options():
     """Build ONNX SessionOptions safe for forked / containerized workers."""
+    # DEFERRED IMPORT: onnxruntime must NOT be imported at module level.
+    # Importing it in the Gunicorn master process initializes C++ loggers
+    # and thread pools that become invalid after fork() → SIGABRT.
+    import onnxruntime as ort
+
     opts = ort.SessionOptions()
     opts.log_severity_level = 3          # ERROR only — prevents DefaultLogger crash
     opts.inter_op_num_threads = 1        # single thread between ops (fork-safe)
@@ -41,6 +44,10 @@ def _create_session_options() -> ort.SessionOptions:
 
 def get_rembg_session():
     """Lazily create and return a singleton rembg session with safe ONNX options."""
+    # DEFERRED IMPORT: rembg.sessions.u2net triggers onnxruntime import
+    # internally, so it must also be deferred to avoid master-process init.
+    from rembg.sessions.u2net import U2netSession
+
     global _rembg_session
     if _rembg_session is None:
         logger.info("Initializing rembg/ONNX session (u2net, CPUExecutionProvider)…")
