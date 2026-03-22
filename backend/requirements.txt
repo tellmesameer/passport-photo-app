@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+python-multipart
+Pillow
+opencv-python-headless
+rembg
+pydantic
+pydantic-settings
+pytest
+httpx

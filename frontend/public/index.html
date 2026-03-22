@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Passport Photo Pro</title>
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Styles -->
+    <link rel="stylesheet" href="../src/css/styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <div>
+                <h1>Passport Photos</h1>
+                <p>Production-ready A4 layouts, instantly.</p>
+            </div>
+            <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle Theme">
+                <i class="fa-solid fa-moon"></i>
+            </button>
+        </header>
+
+        <main class="main-content">
+            <!-- Sidebar / Controls -->
+            <aside class="controls-panel">
+                <form id="upload-form">
+                    <div class="upload-zone" id="upload-zone">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                        <p>Drag & Drop or <span>Browse</span></p>
+                        <input type="file" id="image-input" accept="image/jpeg, image/png" hidden>
+                    </div>
+                    
+                    <!-- File details -->
+                    <div id="file-info" class="file-info hidden">
+                        <span id="file-name" class="file-name"></span>
+                        <i class="fa-solid fa-xmark remove-btn" id="remove-file-btn" aria-label="Remove image"></i>
+                    </div>
+
+                    <div class="settings-group">
+                        <div class="setting-item">
+                            <div>
+                                <label for="page-size">Page Size</label>
+                            </div>
+                            <select id="page-size" name="page_size" class="custom-select">
+                                <option value="A4" selected>A4</option>
+                                <option value="Letter">US Letter</option>
+                                <option value="4x6">4x6</option>
+                                <option value="5x7">5x7</option>
+                            </select>
+                        </div>
+                        <div class="setting-item">
+                            <div>
+                                <label for="orientation">Orientation</label>
+                            </div>
+                            <select id="orientation" name="orientation" class="custom-select">
+                                <option value="portrait" selected>Portrait</option>
+                                <option value="landscape">Landscape</option>
+                            </select>
+                        </div>
+                        <div class="setting-item">
+                            <div>
+                                <label for="copies">Number of Copies</label>
+                                <small>Layout decides max fit</small>
+                            </div>
+                            <input type="number" id="copies" name="copies" value="8" min="1" max="50">
+                        </div>
+
+                        <div class="setting-item">
+                            <div>
+                                <label for="remove-bg">Remove Background</label>
+                                <small>Auto-detect subject</small>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="remove-bg" name="remove_bg" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <div>
+                                <label for="enhance">Enhance Photo</label>
+                                <small>Auto-adjust lighting</small>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="enhance" name="enhance" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="generate-btn" class="primary-btn" disabled>
+                        Create Layout
+                    </button>
+                </form>
+
+                <!-- Actions for generated preview -->
+                <div id="actions-panel" class="actions-panel hidden">
+                    <button id="download-btn" class="secondary-btn">
+                        <i class="fa-solid fa-download"></i> Save PNG
+                    </button>
+                    <button id="print-btn" class="secondary-btn">
+                        <i class="fa-solid fa-print"></i> Print
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Preview Area -->
+            <section class="preview-panel">
+                <div class="preview-container" id="preview-container">
+                    <div class="empty-state" id="empty-state">
+                        <i class="fa-regular fa-image"></i>
+                        <p>Your layout preview will appear here</p>
+                    </div>
+                    <!-- Loading overlay -->
+                    <div class="loading-overlay hidden" id="loading-overlay">
+                        <div class="spinner"></div>
+                        <p>Processing image...</p>
+                    </div>
+                    <div id="live-preview-grid" class="hidden"></div>
+                    <img id="final-layout-image" class="hidden" alt="A4 Passport Layout" />
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../src/js/api.js"></script>
+    <script src="../src/js/app.js"></script>
+</body>
+</html>

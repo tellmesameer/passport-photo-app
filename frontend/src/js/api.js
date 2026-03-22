@@ -1,0 +1,28 @@
+const API_URL = 'http://127.0.0.1:8000/api/v1/photo/process'; // Using absolute URL for direct local testing. In Docker with Nginx, change to '/api/v1/photo/process'
+
+async function generatePassportLayout(file, copies, removeBg, enhance) {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('copies', copies);
+    // Convert boolean to string 'true' / 'false' so FastAPI Form handles it properly if needed
+    formData.append('remove_bg', removeBg ? 'true' : 'false'); 
+    formData.append('enhance', enhance ? 'true' : 'false');
+
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            body: formData,
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || 'Failed to process image');
+        }
+
+        const blob = await response.blob();
+        return blob;
+    } catch (error) {
+        console.error('API Error:', error);
+        throw error;
+    }
+}
