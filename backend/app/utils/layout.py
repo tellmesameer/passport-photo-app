@@ -37,28 +37,29 @@ def generate_layout(photo: Image.Image, copies: int = 8, page_size: str = "A4", 
     
     col = 0
     row = 0
-    
+
+    draw = ImageDraw.Draw(canvas)
     for _ in range(copies):
         if row >= rows:
             # Reached end of page capability
             break
-            
+
         x = margin_x + col * (photo_w + spacing_x)
         y = margin_y + row * (photo_h + spacing_y)
-        
+
         canvas.paste(photo, (x, y))
-        
+
         # Draw 1px cut-line border around the photo
-        draw = ImageDraw.Draw(canvas)
         draw.rectangle([x - 1, y - 1, x + photo_w, y + photo_h], outline="black", width=1)
-        
+
         col += 1
         if col >= cols:
             col = 0
             row += 1
-            
+
     # Output to BytesIO
     output = io.BytesIO()
     canvas.save(output, format="PNG", dpi=(settings.DPI, settings.DPI))
     output.seek(0)
     return output
+
