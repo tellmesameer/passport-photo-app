@@ -19,8 +19,16 @@ RUN pip install --no-cache-dir -r requirements.txt
 ENV U2NET_HOME=/app/.u2net
 RUN mkdir -p /app/.u2net
 
+# ── ONNX Runtime env vars (prevent cpuinfo / thread-pool crashes) ────
+ENV ORT_DISABLE_CPUINFO=1
+ENV OMP_NUM_THREADS=1
+ENV OPENBLAS_NUM_THREADS=1
+ENV ORT_LOG_LEVEL=ERROR
+
 COPY . .
 
-EXPOSE 8000
+EXPOSE 8080
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Use gunicorn.conf.py for production-safe ONNX Runtime initialization
+CMD ["gunicorn", "-c", "gunicorn.conf.py", "app.main:app"]
+

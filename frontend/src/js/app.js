@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const actionsPanel = document.getElementById('actions-panel');
     
     const downloadBtn = document.getElementById('download-btn');
-    const printBtn = document.getElementById('print-btn');
+    const downloadPdfBtn = document.getElementById('download-pdf-btn');
     
     let currentFile = null;
     let uploadedBlobUrl = null;
@@ -215,19 +215,58 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // --- Helpers ---
+    function getTimestamp() {
+        const now = new Date();
+        const dd = String(now.getDate()).padStart(2, '0');
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const yy = String(now.getFullYear()).slice(-2);
+        const hh = String(now.getHours()).padStart(2, '0');
+        const mi = String(now.getMinutes()).padStart(2, '0');
+        const ss = String(now.getSeconds()).padStart(2, '0');
+        return `${dd}${mm}${yy}_${hh}${mi}${ss}`;
+    }
+
     // --- Actions ---
     downloadBtn.addEventListener('click', () => {
         if (!finalBlobUrl) return;
         const a = document.createElement('a');
         a.href = finalBlobUrl;
-        a.download = 'passport_layout_A4.png';
+        a.download = `passport_layout_${getTimestamp()}.png`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
     });
 
-    printBtn.addEventListener('click', () => {
-        if (!finalBlobUrl) return;
-        window.print();
+    downloadPdfBtn.addEventListener('click', async () => {
+        if (!currentFile) return;
+
+        const copies = parseInt(copiesInput.value, 10);
+        const removeBg = document.getElementById('remove-bg').checked;
+        const enhance = document.getElementById('enhance').checked;
+        const pageSize = pageSizeSelect.value;
+        const orientation = orientationSelect.value;
+
+        // Show loading state
+        downloadPdfBtn.disabled = true;
+        const originalText = downloadPdfBtn.innerHTML;
+        downloadPdfBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating...';
+
+        try {
+            const blob = await generatePdfLayout(currentFile, copies, removeBg, enhance, pageSize, orientation);
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `passport_photos_${getTimestamp()}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        } catch (error) {
+            alert(`PDF Error: ${error.message}`);
+        } finally {
+            downloadPdfBtn.disabled = false;
+            downloadPdfBtn.innerHTML = originalText;
+        }
     });
 });

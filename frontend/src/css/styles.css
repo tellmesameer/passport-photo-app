@@ -568,40 +568,4 @@ input:checked + .slider:before {
     }
 }
 
-/* Print Styles */
-@media print {
-    body, html {
-        background: white !important;
-        color: black !important;
-        min-height: auto;
-        height: 100%;
-        margin: 0;
-        padding: 0;
-    }
-    
-    .app-header, .controls-panel {
-        display: none !important;
-    }
-    
-    .app-container, .main-content, .preview-panel, .preview-container {
-        width: 100% !important;
-        height: 100% !important;
-        max-width: none !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        border: none !important;
-        box-shadow: none !important;
-        background: none !important;
-        display: block !important;
-    }
-    
-    #preview-image {
-        width: 100% !important;
-        max-height: 100% !important;
-        object-fit: contain !important;
-        page-break-after: always;
-        display: block;
-        margin: 0 auto;
-        box-shadow: none !important;
-    }
-}
+

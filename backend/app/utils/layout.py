@@ -1,5 +1,5 @@
 import io
-from PIL import Image
+from PIL import Image, ImageDraw
 from app.core.config import settings
 
 def get_page_dimensions(page_size: str, orientation: str):
@@ -47,6 +47,10 @@ def generate_layout(photo: Image.Image, copies: int = 8, page_size: str = "A4", 
         y = margin_y + row * (photo_h + spacing_y)
         
         canvas.paste(photo, (x, y))
+        
+        # Draw 1px cut-line border around the photo
+        draw = ImageDraw.Draw(canvas)
+        draw.rectangle([x - 1, y - 1, x + photo_w, y + photo_h], outline="black", width=1)
         
         col += 1
         if col >= cols:

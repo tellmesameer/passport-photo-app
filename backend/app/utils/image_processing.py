@@ -1,19 +1,77 @@
 import io
+import logging
 from PIL import Image, ImageEnhance
 from rembg import remove
+from rembg.sessions.u2net import U2netSession
+import onnxruntime as ort
+
+logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# Singleton ONNX / rembg session
+# ---------------------------------------------------------------------------
+# WHY: rembg lazily creates an ONNX InferenceSession with default options.
+#   In Gunicorn's forked-worker model, the ONNX Runtime logger and thread
+#   pools initialized by the master process are left in an invalid state
+#   after fork(), causing:
+#     "Attempt to use DefaultLogger but none has been registered" → SIGABRT
+#
+# FIX: We create the session ourselves with safe SessionOptions:
+#   • log_severity_level = 3  → suppress verbose logs, avoid DefaultLogger crash
+#   • inter/intra_op_num_threads = 1  → no thread-pool issues post-fork
+#   • CPUExecutionProvider only  → skip GPU auto-detection (fails in containers)
+#
+# NOTE: We bypass rembg.new_session() because it creates its own
+#   SessionOptions internally and ignores any we pass in. We construct
+#   U2netSession directly to get full control.
+# ---------------------------------------------------------------------------
+
+_rembg_session = None
+
+
+def _create_session_options() -> ort.SessionOptions:
+    """Build ONNX SessionOptions safe for forked / containerized workers."""
+    opts = ort.SessionOptions()
+    opts.log_severity_level = 3          # ERROR only — prevents DefaultLogger crash
+    opts.inter_op_num_threads = 1        # single thread between ops (fork-safe)
+    opts.intra_op_num_threads = 1        # single thread within ops  (fork-safe)
+    opts.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
+    return opts
+
+
+def get_rembg_session():
+    """Lazily create and return a singleton rembg session with safe ONNX options."""
+    global _rembg_session
+    if _rembg_session is None:
+        logger.info("Initializing rembg/ONNX session (u2net, CPUExecutionProvider)…")
+        sess_opts = _create_session_options()
+        _rembg_session = U2netSession(
+            model_name="u2net",
+            sess_opts=sess_opts,
+            providers=["CPUExecutionProvider"],
+        )
+        logger.info("rembg/ONNX session ready.")
+    return _rembg_session
+
+
+def warmup_onnx_session():
+    """Eagerly initialize the session — call from FastAPI lifespan / startup."""
+    get_rembg_session()
+
 
 def remove_background(image: Image.Image) -> Image.Image:
     # Convert PIL Image to bytes
     img_byte_arr = io.BytesIO()
     image.save(img_byte_arr, format=image.format or "PNG")
     input_data = img_byte_arr.getvalue()
-    
-    # Remove background
-    output_data = remove(input_data)
-    
+
+    # Remove background using the pre-initialized session
+    session = get_rembg_session()
+    output_data = remove(input_data, session=session)
+
     # Convert bytes back to PIL Image
     output_image = Image.open(io.BytesIO(output_data)).convert("RGBA")
-    
+
     # Create white background
     white_bg = Image.new("RGBA", output_image.size, "WHITE")
     white_bg.paste(output_image, (0, 0), output_image)

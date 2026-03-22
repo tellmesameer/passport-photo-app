@@ -1,11 +1,39 @@
+import logging
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.api.v1.router import api_router
+from app.utils.image_processing import warmup_onnx_session
+
+# Configure logging so ONNX init messages are visible in Gunicorn
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+)
+logger = logging.getLogger(__name__)
+
+
+# ---------------------------------------------------------------------------
+# Lifespan — runs ONCE per worker process (after Gunicorn fork)
+# ---------------------------------------------------------------------------
+# WHY: Eagerly creating the ONNX session here guarantees it is initialized
+#   *inside* the worker process, not in the Gunicorn master. This avoids the
+#   corrupted logger / thread-pool state that causes SIGABRT.
+# ---------------------------------------------------------------------------
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logger.info("Worker starting — warming up ONNX/rembg session…")
+    warmup_onnx_session()
+    logger.info("ONNX session warm-up complete.")
+    yield
+    logger.info("Worker shutting down.")
+
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
-    openapi_url=f"{settings.API_V1_STR}/openapi.json"
+    openapi_url=f"{settings.API_V1_STR}/openapi.json",
+    lifespan=lifespan,
 )
 
 # CORS configuration
@@ -22,3 +50,4 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
+
