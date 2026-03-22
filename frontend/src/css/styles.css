@@ -217,6 +217,49 @@ body {
     box-shadow: 0 0 0 2px var(--accent);
 }
 
+/* Accordion Styles */
+.accordion-toggle {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: none;
+    border: none;
+    padding: 0 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    margin-bottom: 0.5rem;
+}
+
+.accordion-toggle:focus {
+    outline: none;
+}
+
+.accordion-toggle .chevron {
+    transition: transform 0.3s ease;
+    font-size: 0.8rem;
+}
+
+.accordion-toggle[aria-expanded="true"] .chevron {
+    transform: rotate(-180deg);
+}
+
+.accordion-content {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.3s ease;
+}
+
+.accordion-content.open {
+    grid-template-rows: 1fr;
+}
+
+.accordion-content-inner {
+    overflow: hidden;
+}
+
 /* Apple iOS Toggle Switch */
 .switch {
     position: relative;

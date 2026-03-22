@@ -6,8 +6,8 @@ import threading
 
 def start_frontend():
     frontend_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "frontend")
-    print("Starting frontend server on port 8080...")
-    subprocess.run([sys.executable, "-m", "http.server", "8080"], cwd=frontend_dir)
+    print("Starting frontend server on port 3000...")
+    subprocess.run([sys.executable, "-m", "http.server", "3000"], cwd=frontend_dir)
 
 if __name__ == "__main__":
     # Start frontend in a separate thread

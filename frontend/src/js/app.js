@@ -1,4 +1,15 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Advanced options toggle
+    const advToggle = document.getElementById('advanced-toggle');
+    const advContent = document.getElementById('advanced-content');
+    if (advToggle && advContent) {
+        advToggle.addEventListener('click', () => {
+            const isExpanded = advToggle.getAttribute('aria-expanded') === 'true';
+            advToggle.setAttribute('aria-expanded', !isExpanded);
+            advContent.classList.toggle('open');
+        });
+    }
+
     // Elements
     const uploadZone = document.getElementById('upload-zone');
     const themeToggleBtn = document.getElementById('theme-toggle');
@@ -36,6 +47,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const generateBtn = document.getElementById('generate-btn');
     const uploadForm = document.getElementById('upload-form');
     const copiesInput = document.getElementById('copies');
+    const pageSizeSelect = document.getElementById('page-size');
+    const orientationSelect = document.getElementById('orientation');
     
     const previewContainer = document.getElementById('preview-container');
     const emptyState = document.getElementById('empty-state');
@@ -58,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
         livePreviewGrid.innerHTML = '';
         let copies = parseInt(copiesInput.value, 10);
         if (isNaN(copies) || copies < 1) copies = 1;
-        if (copies > 25) copies = 25;
+        if (copies > 50) copies = 50;
         
         for (let i = 0; i < copies; i++) {
             const img = document.createElement('img');
@@ -167,9 +180,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const copies = parseInt(copiesInput.value, 10);
         const removeBg = document.getElementById('remove-bg').checked;
         const enhance = document.getElementById('enhance').checked;
+        const pageSize = pageSizeSelect.value;
+        const orientation = orientationSelect.value;
 
-        if (isNaN(copies) || copies < 1 || copies > 25) {
-            alert('Maximum limit is 25 copies for an A4 page. Please enter a valid number.');
+        if (isNaN(copies) || copies < 1 || copies > 50) {
+            alert('Please enter a valid number of copies (1-50).');
             return;
         }
 
@@ -182,7 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
         actionsPanel.classList.add('hidden');
 
         try {
-            const blob = await generatePassportLayout(currentFile, copies, removeBg, enhance);
+            const blob = await generatePassportLayout(currentFile, copies, removeBg, enhance, pageSize, orientation);
             
             if (finalBlobUrl) URL.revokeObjectURL(finalBlobUrl);
             finalBlobUrl = URL.createObjectURL(blob);
