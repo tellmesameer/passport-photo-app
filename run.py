@@ -1,8 +1,6 @@
 # run.py
 import os
 import sys
-import subprocess
-import threading
 
 # ── ONNX Runtime env vars — set BEFORE any onnxruntime import ────────
 # These prevent cpuinfo parse failures and thread-pool crashes in
@@ -13,21 +11,14 @@ os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
 
 import uvicorn
 
-def start_frontend():
-    frontend_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "frontend")
-    print("Starting frontend server on port 3000...")
-    subprocess.run([sys.executable, "-m", "http.server", "3000"], cwd=frontend_dir)
-
 if __name__ == "__main__":
-    # Start frontend in a separate thread
-    frontend_thread = threading.Thread(target=start_frontend, daemon=True)
-    frontend_thread.start()
-
     # Include backend directory in python path for uvicorn to find 'app.main:app'
     backend_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "backend")
     sys.path.insert(0, backend_dir)
 
-    print("Starting FastAPI backend server on port 8000...")
-    # Add reload_dirs so changes in the backend directory still trigger hot reloads
+    # FastAPI serves the frontend via StaticFiles (see backend/app/main.py).
+    # Both the API and the UI are available on the same port — no separate
+    # frontend process is needed.
+    print("Starting server on http://localhost:8000 ...")
     uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True, reload_dirs=[backend_dir])
 

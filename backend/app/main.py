@@ -68,16 +68,40 @@ def leapcell_health_check():
 
 
 # ---------------------------------------------------------------------------
-# Serve the frontend as static files (single-container deployment)
+# Serve the frontend via Jinja2 templates + static asset mounts
 # ---------------------------------------------------------------------------
-# The frontend directory is expected next to the backend `app/` package.
-# In Docker it is COPY'd to /app/frontend.  Locally it lives at ../frontend.
-# Mount LAST so API routes take priority over the catch-all static mount.
+# Structure:
+#   frontend/index.html   → rendered by Jinja2 at GET /
+#   frontend/src/         → served as /static  (CSS, JS)
+#   frontend/public/      → served as /public  (images, icons, etc.)
 # ---------------------------------------------------------------------------
+from fastapi.templating import Jinja2Templates
+from fastapi.requests import Request
+
 _frontend_dir = Path(__file__).resolve().parent.parent.parent / "frontend"
+
 if _frontend_dir.is_dir():
-    app.mount("/", StaticFiles(directory=str(_frontend_dir), html=True), name="frontend")
-    logger.info("Serving frontend from %s", _frontend_dir)
+    templates = Jinja2Templates(directory=str(_frontend_dir))
+
+    # CSS / JS assets
+    _src_dir = _frontend_dir / "src"
+    if _src_dir.is_dir():
+        app.mount("/static", StaticFiles(directory=str(_src_dir)), name="static")
+        logger.info("Serving static assets (CSS/JS) from %s", _src_dir)
+
+    # Public assets (images, icons, fonts …)
+    _public_dir = _frontend_dir / "public"
+    if _public_dir.is_dir():
+        app.mount("/public", StaticFiles(directory=str(_public_dir)), name="public")
+        logger.info("Serving public assets from %s", _public_dir)
+
+    @app.get("/")
+    async def serve_index(request: Request):
+        return templates.TemplateResponse("index.html", {"request": request})
+
+    logger.info("Serving frontend (Jinja2) from %s", _frontend_dir)
 else:
-    logger.warning("Frontend directory not found at %s — static files will not be served.", _frontend_dir)
+    logger.warning(
+        "Frontend directory not found at %s — UI will not be served.", _frontend_dir
+    )
 
