@@ -34,6 +34,10 @@ def _create_session_options():
     # and thread pools that become invalid after fork() → SIGABRT.
     import onnxruntime as ort
 
+    # Explicitly register the default logger before anything else inside the worker.
+    # This prevents the "Attempt to use DefaultLogger but none has been registered" crash.
+    ort.set_default_logger()
+
     opts = ort.SessionOptions()
     opts.log_severity_level = 3          # ERROR only — prevents DefaultLogger crash
     opts.inter_op_num_threads = 1        # single thread between ops (fork-safe)
