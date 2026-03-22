@@ -27,9 +27,10 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info("Worker starting — warming up ONNX/rembg session…")
+    # warmup_onnx_session is a no-op if rembg/onnxruntime is not installed;
+    # it eagerly loads the u2net model when the ONNX backend is active.
     warmup_onnx_session()
-    logger.info("ONNX session warm-up complete.")
+    logger.info("Worker starting.")
     yield
     logger.info("Worker shutting down.")
 

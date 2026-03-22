@@ -63,6 +63,56 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentFile = null;
     let uploadedBlobUrl = null;
     let finalBlobUrl = null;
+    let errorDismissTimer = null;
+
+    // --- Error banner helpers ---
+    function showError(message) {
+        clearError();
+        let banner = document.getElementById('error-banner');
+        if (!banner) {
+            banner = document.createElement('div');
+            banner.id = 'error-banner';
+            banner.style.cssText = [
+                'display:flex', 'align-items:flex-start', 'gap:10px',
+                'background:#fff0f0', 'border:1.5px solid #e74c3c',
+                'color:#c0392b', 'border-radius:10px', 'padding:14px 16px',
+                'margin-bottom:16px', 'font-size:0.93rem', 'line-height:1.5',
+                'animation:fadeIn .2s ease', 'box-shadow:0 2px 8px rgba(231,76,60,.15)'
+            ].join(';');
+
+            const icon = document.createElement('i');
+            icon.className = 'fa-solid fa-circle-exclamation';
+            icon.style.cssText = 'margin-top:2px;flex-shrink:0;font-size:1.1rem;';
+
+            const text = document.createElement('span');
+            text.id = 'error-banner-text';
+
+            const close = document.createElement('button');
+            close.innerHTML = '&times;';
+            close.style.cssText = [
+                'margin-left:auto', 'background:none', 'border:none',
+                'color:inherit', 'font-size:1.3rem', 'cursor:pointer',
+                'line-height:1', 'padding:0', 'flex-shrink:0'
+            ].join(';');
+            close.addEventListener('click', clearError);
+
+            banner.appendChild(icon);
+            banner.appendChild(text);
+            banner.appendChild(close);
+            previewContainer.insertBefore(banner, previewContainer.firstChild);
+        }
+        document.getElementById('error-banner-text').textContent = message;
+        banner.style.display = 'flex';
+        // Auto-dismiss after 8 s
+        errorDismissTimer = setTimeout(clearError, 8000);
+    }
+
+    function clearError() {
+        if (errorDismissTimer) { clearTimeout(errorDismissTimer); errorDismissTimer = null; }
+        const banner = document.getElementById('error-banner');
+        if (banner) banner.style.display = 'none';
+    }
+
 
     // --- Live Render logic ---
     function renderLivePreview() {
@@ -197,6 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
         actionsPanel.classList.add('hidden');
 
         try {
+            clearError();
             const blob = await generatePassportLayout(currentFile, copies, removeBg, enhance, pageSize, orientation);
             
             if (finalBlobUrl) URL.revokeObjectURL(finalBlobUrl);
@@ -206,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
             finalLayoutImage.classList.remove('hidden');
             actionsPanel.classList.remove('hidden');
         } catch (error) {
-            alert(`Error: ${error.message}`);
+            showError(error.message);
             // Re-show live grid on error
             livePreviewGrid.classList.remove('hidden');
         } finally {
@@ -263,7 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.removeChild(a);
             setTimeout(() => URL.revokeObjectURL(url), 1000);
         } catch (error) {
-            alert(`PDF Error: ${error.message}`);
+            showError(error.message);
         } finally {
             downloadPdfBtn.disabled = false;
             downloadPdfBtn.innerHTML = originalText;
