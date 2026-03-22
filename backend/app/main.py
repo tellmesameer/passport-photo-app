@@ -6,9 +6,9 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from app.core.config import settings
-from app.api.v1.router import api_router
-from app.utils.image_processing import warmup_onnx_session
+from .core.config import settings
+from .api.v1.router import api_router
+from .utils.image_processing import warmup_onnx_session
 
 # Configure logging so ONNX init messages are visible in Gunicorn
 logging.basicConfig(

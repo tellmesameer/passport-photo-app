@@ -1,7 +1,7 @@
 import logging
 from fastapi import APIRouter, File, UploadFile, Form
 from fastapi.responses import Response, JSONResponse
-from app.services.image_service import process_photo_service, generate_pdf_service
+from ....services.image_service import process_photo_service, generate_pdf_service
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

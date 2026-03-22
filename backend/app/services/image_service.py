@@ -1,10 +1,10 @@
 from fastapi import UploadFile
 from PIL import Image
 import io
-from app.utils.image_processing import remove_background, enhance_image, resize_to_passport
-from app.utils.layout import generate_layout
-from app.utils.pdf_generator import generate_pdf
-from app.core.config import settings
+from ..utils.image_processing import remove_background, enhance_image, resize_to_passport
+from ..utils.layout import generate_layout
+from ..utils.pdf_generator import generate_pdf
+from ..core.config import settings
 
 
 def _prepare_passport_image(file: UploadFile, remove_bg: bool, enhance: bool) -> Image.Image:

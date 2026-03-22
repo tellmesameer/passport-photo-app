@@ -1,6 +1,6 @@
 import io
 from PIL import Image, ImageDraw
-from app.core.config import settings
+from ..core.config import settings
 
 def get_page_dimensions(page_size: str, orientation: str):
     sizes = {
