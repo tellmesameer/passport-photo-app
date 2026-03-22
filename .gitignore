@@ -56,5 +56,12 @@ temp/
 
 # Agent configuration / tools
 .agents/
+.agent/
+_agents/
+_agent/
 .cortex/
 .commandcode/
+.impeccable.md
+.gemini/
+skills-lock.json
+.agent/
