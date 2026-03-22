@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('error-banner-text').textContent = message;
         banner.style.display = 'flex';
         // Auto-dismiss after 8 s
-        errorDismissTimer = setTimeout(clearError, 8000);
+        errorDismissTimer = setTimeout(clearError, 10000);
     }
 
     function clearError() {

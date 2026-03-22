@@ -3,6 +3,7 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Passport Photo Generator API"
     API_V1_STR: str = "/api/v1"
+    PORT: int = 10000
     
     # Layout Config
     A4_WIDTH_PX: int = 2480  # 300 DPI
