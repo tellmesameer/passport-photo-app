@@ -25,9 +25,6 @@ _rembg_session = None    # singleton rembg session (only used when BACKEND==onnx
 def _create_onnx_session_options():
     """Build ONNX SessionOptions safe for forked / containerised workers."""
     import onnxruntime as ort
-    # Explicitly register the default logger *inside* the worker (post-fork).
-    # Prevents "Attempt to use DefaultLogger but none has been registered" → SIGABRT.
-    ort.set_default_logger()
 
     opts = ort.SessionOptions()
     opts.log_severity_level = 3           # ERROR only — avoids DefaultLogger crash
